@@ -7,10 +7,12 @@ namespace LeaveManagement.Web.Repositories
     public class GenericRepository<T> : IGenericRepository<T> where T : class
     {
         private readonly ApplicationDbContext context;
+        //private readonly ApplicationDbContext _context;
 
         public GenericRepository(ApplicationDbContext context)
         {
             this.context = context;
+            //_context = context;
         }
 
         public async Task<T> AddAsync(T entity)
@@ -18,6 +20,12 @@ namespace LeaveManagement.Web.Repositories
             await context.AddAsync(entity); 
             await context.SaveChangesAsync();
             return entity;
+        }
+
+        public async Task AddRangeAsync(List<T> entities)
+        {
+            await context.AddRangeAsync(entities);
+            await context.SaveChangesAsync();
         }
 
         public async Task DeleteAsync(int id)

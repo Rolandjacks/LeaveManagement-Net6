@@ -5,34 +5,30 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-//using LeaveManagement.Data;
-using AutoMapper;
-//using LeaveManagement.Common.Models;
-//using LeaveManagement.Application.Contracts;
-using Microsoft.AspNetCore.Authorization;
-using LeaveManagement.Web.Contracts;
-using LeaveManagement.Web.Models;
 using LeaveManagement.Web.Data;
+using AutoMapper;
+using LeaveManagement.Web.Models;
+using LeaveManagement.Web.Contracts;
+using Microsoft.AspNetCore.Authorization;
 using LeaveManagement.Web.Constants;
-//using LeaveManagement.Common.Constants;
 
 namespace LeaveManagement.Web.Controllers
 {
-    //[Authorize(Roles = Roles.Administrator)]
     [Authorize(Roles = Roles.Administrator)]
+
     public class LeaveTypesController : Controller
     {
         private readonly ILeaveTypeRepository leaveTypeRepository;
         private readonly IMapper mapper;
-        //private readonly ILeaveAllocationRepository leaveAllocationRepository;
+        private readonly ILeaveAllocationRepository leaveAllocationRepository;
 
         public LeaveTypesController(ILeaveTypeRepository leaveTypeRepository
-            , IMapper mapper)
-            //, ILeaveAllocationRepository leaveAllocationRepository)
+            , IMapper mapper
+            , ILeaveAllocationRepository leaveAllocationRepository)
         {
             this.leaveTypeRepository = leaveTypeRepository;
             this.mapper = mapper;
-            //this.leaveAllocationRepository = leaveAllocationRepository;
+            this.leaveAllocationRepository = leaveAllocationRepository;
         }
 
         // GET: LeaveTypes
@@ -56,7 +52,6 @@ namespace LeaveManagement.Web.Controllers
         }
 
         // GET: LeaveTypes/Create
-        [Authorize(Roles = Roles.Administrator)]
         public IActionResult Create()
         {
             return View();
@@ -65,9 +60,9 @@ namespace LeaveManagement.Web.Controllers
         // POST: LeaveTypes/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [Authorize(Roles = Roles.Administrator)]
         [HttpPost]
         [ValidateAntiForgeryToken]
+
         public async Task<IActionResult> Create(LeaveTypeVM leaveTypeVM)
         {
             if (ModelState.IsValid)
@@ -79,8 +74,8 @@ namespace LeaveManagement.Web.Controllers
             return View(leaveTypeVM);
         }
 
+
         // GET: LeaveTypes/Edit/5
-        [Authorize(Roles = Roles.Administrator)]
         public async Task<IActionResult> Edit(int? id)
         {
             var leaveType = await leaveTypeRepository.GetAsync(id);
@@ -93,11 +88,9 @@ namespace LeaveManagement.Web.Controllers
             return View(leaveTypeVM);
         }
 
-
         // POST: LeaveTypes/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [Authorize(Roles = Roles.Administrator)]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, LeaveTypeVM leaveTypeVM)
@@ -107,18 +100,11 @@ namespace LeaveManagement.Web.Controllers
                 return NotFound();
             }
 
-            var leaveType = await leaveTypeRepository.GetAsync(id);
-
-            if (leaveType == null)
-            {
-                return NotFound();
-            }
-
             if (ModelState.IsValid)
             {
                 try
                 {
-                    mapper.Map(leaveTypeVM, leaveType);
+                    var leaveType = mapper.Map<LeaveType>(leaveTypeVM);
                     await leaveTypeRepository.UpdateAsync(leaveType);
                 }
                 catch (DbUpdateConcurrencyException)
@@ -138,7 +124,6 @@ namespace LeaveManagement.Web.Controllers
         }
 
         // POST: LeaveTypes/Delete/5
-        [Authorize(Roles = Roles.Administrator)]
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
@@ -147,12 +132,12 @@ namespace LeaveManagement.Web.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        //[HttpPost]
-        //[ValidateAntiForgeryToken]
-        //public async Task<IActionResult> AllocateLeave(int id)
-        //{
-        //    await leaveAllocationRepository.LeaveAllocation(id);
-        //    return RedirectToAction(nameof(Index));
-        //}
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AllocateLeave(int id)
+        {
+            await leaveAllocationRepository.LeaveAllocation(id);
+            return RedirectToAction(nameof(Index));
+        }
     }
 }
